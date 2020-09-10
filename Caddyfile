@@ -1,0 +1,11 @@
+localhost:8000 {
+    root ./public
+    fastcgi / 127.0.0.1:9000 php
+    rewrite {
+        to {path} {path}/ /index.php?{query}
+    }
+}
+
+localhost:8000/lib {
+    proxy / http://s1.moodrain.cn/lib
+}

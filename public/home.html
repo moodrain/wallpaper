@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallpaper</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        html,
+        body,
+        #main,
+        .background {
+            width: 100%;
+            height: 100%;
+            background: black;
+        }
+        
+        .background {
+            position: absolute;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition:opacity 1.95s linear;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main">
+        <div class="background" id="background-1"></div>
+        <div class="background" id="background-2"></div>
+    </div>
+    <script>
+        let images = []
+        let loadImages = []
+        let curBackground = 0
+        let backgrounds = [document.getElementById('background-1'), document.getElementById('background-2')]
+        let nextTimer
+        let clickCount = 0
+        let changing = false
+        let loading = true
+        let nextInterval = query('time', 'int') ? query('time', 'int') : 1800
+
+        document.body.addEventListener('auxclick', () => {
+            next()
+        })
+        document.body.addEventListener('click', () => {
+            clickCount++
+            setTimeout(() => {
+                clickCount--
+            }, 500)
+            if (clickCount === 3) {
+                next()
+            }
+        })
+
+        showLoad()
+
+        fet('/api/home?token=' + query('token')).then(rs => {
+            if (rs.code !== 0) {
+                alert(rs.msg)
+                return
+            }
+            images = rs.data.map(img => img.url)
+            next()
+        })
+
+        function next() {
+            let init = loadImages.length === 0
+            if (init) {
+                loadImages.push(getImg())
+                loadImages.push(getImg())
+                loadImages.push(getImg())
+                loadImages.push(getImg())
+            } else {
+                if (loading || changing) {
+                    return
+                }
+                changing = true
+                loadImages.splice(0, 1)
+                loadImages.push(getImg())
+            }
+            if (loadImages[0].complete) {
+                showImg()
+            } else {
+                loading = true
+                showLoad()
+                return
+            }
+        }
+
+        function getImg() {
+            let validImgs = images.filter(i => !loadImages.map(i => i.src).includes(i))
+            let image = new Image()
+            let url = validImgs[random(validImgs.length - 1)]
+            image.src = url
+            image.addEventListener('load', () => {
+                if (loadImages[0].src == url) {
+                    loading = false
+                    showImg()
+                }
+            })
+            return image
+        }
+
+        function showImg() {
+            let curBack = backgrounds[curBackground]
+            let nextBack = backgrounds[(curBackground + 1) % 2]
+            curBack.style.opacity = 0
+            nextBack.style.opacity = 1
+            nextBack.style.backgroundImage = 'url(' + loadImages[0].src + ')'
+            curBackground = (curBackground + 1) % 2
+            clearTimeout(nextTimer)
+            nextTimer = setTimeout(() => {
+                next()
+            }, nextInterval * 1000)
+            setTimeout(() => {
+                changing = false
+            }, 2000)
+        }
+
+        function showLoad() {
+            backgrounds.forEach(b => {
+                b.style.backgroundImage = ''
+                b.style.opacity = 0
+            })
+        }
+
+        function fet(url) {
+
+            url = 'http://localhost:8000' + url
+
+            let option = {
+                credentials: 'same-origin',
+                method: 'get',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                mode: 'cors',
+            }
+            return fetch(url, option).then(r => r.json())
+        }
+
+        function query(name, type = 'string') {
+            let query = name => {
+                name = name.replace(/[\[\]]/g, '\\$&')
+                let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)')
+                let results = regex.exec(window.location.href)
+                if (!results) {
+                    return null
+                }
+                if (!results[2]) {
+                    return ''
+                }
+                return decodeURIComponent(results[2].replace(/\+/g, ' '))
+            }
+            let value = query(name)
+            switch (type) {
+                case 'integer':
+                    // no break
+                case 'int':
+                    let number = window.parseInt(value)
+                    return isNaN(number) ? '' : number
+                default:
+                    return value
+            }
+        }
+
+        function random(max) {
+            return Math.floor(Math.random() * Math.floor(max - 1))
+        }
+    </script>
+</body>
+
+</html>
