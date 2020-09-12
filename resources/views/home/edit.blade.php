@@ -6,10 +6,21 @@
     <el-row>
         <el-col :xs="24" :span="16">
             <el-card>
-                <el-input v-model="form.name"><template slot="prepend">名称</template></el-input>
+                <el-form>
+                    <el-form-item>
+                        <el-input  v-model="form.name"><template slot="prepend">名称</template></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button icon="el-icon-finished" @click="(multiSelect = ! multiSelect) && (imageSelects = [])" :type="multiSelect ? 'primary' : ''"></el-button>
+                        <el-button v-if="multiSelect" :type="imageSelects.length == images.length ? 'primary' : ''" @click="imageSelects.length == images.length ? imageSelects = [] : imageSelects = images.concat()">全选</el-button>
+                    </el-form-item>
+                </el-form>
                 <el-divider>图片</el-divider>
                 <div>
-                    <el-card class="image-card" shadow="hover" v-for="image in images" :key="image.id" @click.right.native.prevent="toEdit(image)" @click.native="toPreview(image)">
+                    <el-card class="image-card" shadow="hover" v-for="image in images" :key="image.id"
+                             @click.right.native.prevent="toEdit(image)" @click.native="toPreview(image)"
+                             :class="multiSelect && imageSelects.includes(image) ? 'card-select' : ''"
+                    >
                         <el-image class="image" lazy :src="image.thumb200" fit="contain"></el-image>
                     </el-card>
                 </div>
@@ -62,34 +73,36 @@ new Vue({
                 url: '',
             },
             images: @json($home->images),
+            imageSelects: [],
             tags: @json(\App\Models\Tag::query()->get(['id', 'name'])),
+            multiSelect: false,
         }
     },
     methods: {
         @include('piece.method')
         toPreview(image) {
+            if (this.multiSelect) {
+                let find = this.images.find(i => i.id === image.id)
+                this.imageSelects.includes(find) ? this.imageSelects.splice(this.imageSelects.indexOf(find), 1) : this.imageSelects.push(find)
+                return
+            }
             this.preview.url = image.thumb800
             this.show.preview = true
         },
         toEdit(image) {
+            if (this.multiSelect && ! this.imageSelects.includes(image)) {
+                this.imageSelects.push(image)
+            }
             this.show.edit = true
             this.edit.id = image.id
             this.edit.tags = image.tagIds
         },
         remove() {
             this.show.edit = false
-            for (let i = 0;i < this.images.length;i++) {
-                if (this.images[i].id === this.edit.id) {
-                    this.images.splice(i, 1)
-                    break
-                }
-            }
-            for (let i = 0;i < this.form.images.length;i++) {
-                if (this.form.images[i] === this.edit.id) {
-                    this.form.images.splice(i, 1)
-                    break
-                }
-            }
+            let ids = this.multiSelect ? this.imageSelects.map(i => i.id) : [this.edit.id]
+            this.images = this.images.filter(i => ! ids.includes(i.id))
+            this.multiSelect = false
+            this.imageSelects = []
         }
     },
     mounted() {

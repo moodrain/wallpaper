@@ -32,7 +32,7 @@ class HomeController extends Controller
         $home->save();
         $home->token = $this->homeSrv->genToken($home->userId, $home->id);
         $home->save();
-        return $this->backOk();
+        return $this->directOk('/home/' . $home->id);
     }
 
     public function save()
@@ -47,7 +47,7 @@ class HomeController extends Controller
         $home->fill(request()->only('home'));
         $home->save();
         $home->images()->sync(request('images'));
-        return $this->backOk();
+        return $this->directOk('/home');
     }
 
     public function remove()
@@ -60,13 +60,19 @@ class HomeController extends Controller
     public function addImage()
     {
         return $this->api([
-            'homeId' => 'required|exists:homes,id',
-            'imageId' => 'required|exists:images,id'
+            'homeId' => request('all') ? '' : 'required|exists:homes,id',
+            'imageIds' => 'required|array|exists:images,id',
+            'all' => 'bool',
         ], function() {
-            $home = Home::query()->where('user_id', uid())->find(request('homeId'));
-            $image = Image::query()->where('user_id', uid())->find(request('imageId'));
-            expIf(! $home || ! $image, '桌面或图片不存在');
-            $home->images()->syncWithoutDetaching([request('imageId')]);
+            $images = Image::query()->where('user_id', uid())->whereIn('id', request('imageIds'))->get();
+            expIf($images->count() != count(request('imageIds')), '图片不存在');
+            $homeBuilder = Home::query()->where('user_id', uid());
+            ! request('all') && $homeBuilder->where('id', request('homeId'));
+            $homes = $homeBuilder->get();
+            expIf($homes->isEmpty(), '桌面不存在');
+            foreach($homes as $home) {
+                $home->images()->syncWithoutDetaching(request('imageIds'));
+            }
             return rs();
         });
     }

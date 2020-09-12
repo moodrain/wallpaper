@@ -42,30 +42,36 @@ class ImageController extends Controller
         });
     }
 
-    public function save()
+    public function tag()
     {
         return $this->api([
-            'id' => 'required|exists:images',
+            'id' => 'exists:images',
+            'ids' => 'array|exists:images,id',
             'tags' => 'array',
             'tags.*' => 'required|exists:tags,id',
         ], function() {
-            $image = Image::query()->where('user_id', uid())->find(request('id'));
-            expIf(! $image, '图片不存在');
-            $image->tags()->sync(request('tags'));
-            $image->save();
+            $ids = array_unique(array_merge(request('id') ? [request('id')] : [], request('ids', [])));
+            $images = Image::query()->where('user_id', uid())->whereIn('id', $ids)->get();
+            expIf($images->count() != count($ids), '图片不存在');
+            foreach($images as $image) {
+                $image->tags()->sync(request('tags'));
+            }
             return rs();
         });
     }
 
     public function remove(OssService $oss)
     {
-        return $this->api(['id' => 'required'], function() use ($oss) {
-            $image = Image::query()->where('user_id', uid())->find(request('id'));
-            expIf(! $image, '图片不存在');
-            expIf(DB::table('home_image')->where('image_id', $image->id)->exists(), '有使用了该图片的桌面，无法删除');
-            $image->delete();
-            if (! Image::query()->where('md5', $image->md5)->exists()) {
-                $oss->delete('moodrain', $image->path);
+        return $this->api(['id' => '', 'ids' => 'array'], function() use ($oss) {
+            $ids = array_unique(array_merge(request('id') ? [request('id')] : [], request('ids', [])));
+            $images = Image::query()->where('user_id', uid())->whereIn('id', $ids)->get();
+            expIf($images->count() != count($ids), '图片不存在');
+            expIf(DB::table('home_image')->whereIn('image_id', $ids)->exists(), '有使用了该图片的桌面，无法删除');
+            Image::query()->whereIn('id', $ids)->delete();
+            foreach($images as $image) {
+                if (! Image::query()->where('md5', $image->md5)->exists()) {
+                    $oss->delete('moodrain', $image->path);
+                }
             }
             return rs();
         });

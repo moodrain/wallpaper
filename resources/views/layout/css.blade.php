@@ -52,4 +52,10 @@
         width: 200px;
         height: 200px;
     }
+    .edit-dialog {
+        width: 400px;
+    }
+    .card-select {
+        border: 1px solid dodgerblue;
+    }
 </style>

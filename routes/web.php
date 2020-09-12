@@ -2,12 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', 'IndexController@index');
 Route::any('login', 'UserController@login')->name('login');
 Route::any('register', 'UserController@register');
 
 Route::middleware(['auth'])->group(function() {
 
+    Route::get('/', 'IndexController@index');
     Route::post('logout', 'UserController@logout');
 
     Route::get('tag', 'TagController@index');
@@ -16,7 +16,7 @@ Route::middleware(['auth'])->group(function() {
 
     Route::get('image', 'ImageController@index');
     Route::post('image/upload', 'ImageController@upload');
-    Route::post('image/save', 'ImageController@save');
+    Route::post('image/tag', 'ImageController@tag');
     Route::post('image/remove', 'ImageController@remove');
 
     Route::get('home', 'HomeController@index');
