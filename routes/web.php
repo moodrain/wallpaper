@@ -2,12 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', 'IndexController@index');
 Route::any('login', 'UserController@login')->name('login');
 Route::any('register', 'UserController@register');
 
 Route::middleware(['auth'])->group(function() {
 
-    Route::get('/', 'IndexController@index');
     Route::post('logout', 'UserController@logout');
 
     Route::get('tag', 'TagController@index');
