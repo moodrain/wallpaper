@@ -30,7 +30,7 @@
         </el-col>
     </el-row>
 
-    <el-dialog :visible.sync="show.edit" style="width: 50%;margin-left: 25%">
+    <el-dialog :visible.sync="show.edit" custom-class="edit-dialog">
         <el-form>
             <el-form-item label="标签">
                 <el-select v-model="edit.tags" filterable multiple disabled>
@@ -101,6 +101,7 @@ new Vue({
             this.show.edit = false
             let ids = this.multiSelect ? this.imageSelects.map(i => i.id) : [this.edit.id]
             this.images = this.images.filter(i => ! ids.includes(i.id))
+            this.form.images = this.form.images.filter(i => ! ids.includes(i))
             this.multiSelect = false
             this.imageSelects = []
         }
