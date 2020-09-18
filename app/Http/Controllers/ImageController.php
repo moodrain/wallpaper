@@ -66,7 +66,7 @@ class ImageController extends Controller
             $ids = array_unique(array_merge(request('id') ? [request('id')] : [], request('ids', [])));
             $images = Image::query()->where('user_id', uid())->whereIn('id', $ids)->get();
             expIf($images->count() != count($ids), '图片不存在');
-            expIf(DB::table('home_image')->whereIn('image_id', $ids)->exists(), '有使用了该图片的桌面，无法删除');
+            expIf(DB::table('home_image')->where('user_id', uid())->whereIn('image_id', $ids)->exists(), '有使用了该图片的桌面，无法删除');
             Image::query()->whereIn('id', $ids)->delete();
             foreach($images as $image) {
                 if (! Image::query()->where('md5', $image->md5)->exists()) {

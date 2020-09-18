@@ -32,7 +32,7 @@ class HomeController extends Controller
         $home->save();
         $home->token = $this->homeSrv->genToken($home->userId, $home->id);
         $home->save();
-        return $this->directOk('/home/' . $home->id);
+        return $this->directOk('/home');
     }
 
     public function save()
