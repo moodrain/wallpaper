@@ -67,6 +67,10 @@
             return
         }
         images = rs.data.map(img => img.url)
+        if (images.length < 5) {
+            alert('桌面的图片数不能少于 5 张')
+            return
+        }
         next()
     })
 
