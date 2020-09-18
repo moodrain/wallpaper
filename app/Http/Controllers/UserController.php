@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller {
@@ -35,7 +34,7 @@ class UserController extends Controller {
         return redirect('login');
     }
 
-    public function register(UserService $userService)
+    public function register()
     {
         if (request()->isMethod('get')) {
             return view('user.register');
@@ -49,20 +48,9 @@ class UserController extends Controller {
         $user->email    = request('email');
         $user->name     = request('name');
         $user->password = password_hash(request('password'), PASSWORD_DEFAULT);
-        $user->token = $userService->genToken();
         $user->save();
         Auth::loginUsingId($user->id);
         return redirect('/');
-    }
-
-    public function token(UserService $userService)
-    {
-        if (request()->isMethod('post')) {
-            user()->token = $userService->genToken();
-            user()->save();
-            return $this->viewOk('token', ['token' => user()->token]);
-        }
-        return view('token', ['token' => user()->token]);
     }
 
 }
