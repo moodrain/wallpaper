@@ -12,6 +12,7 @@ class HomeController extends Controller
     public function index()
     {
         $homes = Home::query()->where('user_id', uid())->withCount('images')->get();
+        $homes->makeVisible('token');
         return view('home.index', compact('homes'));
     }
 

@@ -19,8 +19,12 @@
                 <el-table :data="homes">
                     <el-table-column prop="id" label="ID"></el-table-column>
                     <el-table-column prop="name" label="名称"></el-table-column>
-                    <el-table-column prop="imagesCount" label="图片数" width="70"></el-table-column>
-                    <el-table-column prop="token" label="令牌"></el-table-column>
+                    <el-table-column prop="imagesCount" label="图片数" width="70" align="center"></el-table-column>
+                    <el-table-column label="链接" width="80" align="center">
+                        <template slot-scope="scope">
+                            <el-button class="clipboard-btn" icon="el-icon-document" :data-clipboard-text="host + '?token=' + scope.row.token"></el-button>
+                        </template>
+                    </el-table-column>
                     <el-table-column label="操作">
                         <template slot-scope="scope">
                             <el-button @click="$to('/home/' + scope.row.id)" icon="el-icon-edit"></el-button>
@@ -44,7 +48,8 @@ new Vue({
             homes: @json($homes),
             form: {
                 name: '',
-            }
+            },
+            host: window.location.host
         }
     },
     methods: {
