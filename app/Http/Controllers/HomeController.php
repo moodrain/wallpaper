@@ -20,7 +20,6 @@ class HomeController extends Controller
     {
         $home->load('images.tags');
         $home->images->makeVisible('pivot');
-        dj($home);
         $home->images = $home->images->sortByDesc('pivot.created_at')->values();
         $home->images->map(function($e) { $e->append('tagIds'); });
         return view('home.edit', compact('home'));
