@@ -26,7 +26,7 @@ class Image extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function home()
+    public function homes()
     {
         return $this->belongsToMany(Home::class);
     }

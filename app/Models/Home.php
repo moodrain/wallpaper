@@ -12,6 +12,8 @@ class Home extends Model
 
     public static $sortRule = ['id', 'name', 'createdAt', 'updatedAt'];
 
+    protected $hidden = ['token'];
+
     public function images()
     {
         return $this->belongsToMany(Image::class);
