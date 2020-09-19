@@ -16,7 +16,7 @@ class Home extends Model
 
     public function images()
     {
-        return $this->belongsToMany(Image::class);
+        return $this->belongsToMany(Image::class)->withTimestamps();
     }
 
     public function getImageIdsAttribute()
