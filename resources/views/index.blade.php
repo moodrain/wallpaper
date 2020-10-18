@@ -11,6 +11,7 @@
                     <el-button icon="el-icon-search" @click="$to(search, true)"></el-button>
                     <el-button icon="el-icon-upload2" @click="show.upload = !show.upload"></el-button>
                     <el-button icon="el-icon-finished" @click="(multiSelect = ! multiSelect) && (imageSelects = [])" :type="multiSelect ? 'primary' : ''"></el-button>
+                    <el-button v-if="multiSelect" :type="imageSelects.length == images.length ? 'primary' : ''" @click="imageSelects.length == images.length ? imageSelects = [] : imageSelects = images.concat()">全选</el-button>
                 </el-form>
                 <div v-if="show.upload">
                     <el-divider></el-divider>
@@ -34,7 +35,7 @@
             </el-card>
             <br />
             <el-card>
-                <x-pager :size="50"></x-pager>
+                <x-pager :size="200"></x-pager>
             </el-card>
         </el-col>
     </el-row>

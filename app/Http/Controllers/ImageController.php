@@ -16,7 +16,7 @@ class ImageController extends Controller
             $q->where('tag_id', request('tag'));
         });
         request('name') && $builder->where('name', 'like', '%' . request('name') . '%');
-        $pager = $builder->paginate(50);
+        $pager = $builder->paginate(200);
         $pager->getCollection()->append('tagIds');
         $homes = Home::query()->where('user_id', uid())->latest()->get(['id', 'name']);
         return view('index', compact('pager', 'homes'));
