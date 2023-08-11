@@ -31,7 +31,7 @@ class ImageController extends Controller
             $md5 = md5($content);
             $img = Image::query()->firstOrNew(['user_id' => uid(), 'md5' => $md5], ['size' => $file->getSize() / 1024]);
             if (! Image::query()->where('md5', $md5)->exists()) {
-                $oss->put('moodrain', $img->path, $content);
+                $oss->put('moodrain-gz', $img->path, $content);
             }
             $img->save();
             ! $img->isDirty() && $img->touch();
