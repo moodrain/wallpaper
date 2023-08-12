@@ -6,5 +6,6 @@ return [
     'oss' => [
         'cdn' => env('ALIYUN_OSS_CDN'),
         'endpoint' => env('ALIYUN_OSS_ENDPOINT'),
+        'bucket' => env('ALIYUN_OSS_BUCKET'),
     ],
 ];

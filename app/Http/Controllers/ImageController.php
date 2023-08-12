@@ -31,7 +31,7 @@ class ImageController extends Controller
             $md5 = md5($content);
             $img = Image::query()->firstOrNew(['user_id' => uid(), 'md5' => $md5], ['size' => $file->getSize() / 1024]);
             if (! Image::query()->where('md5', $md5)->exists()) {
-                $oss->put('moodrain-gz', $img->path, $content);
+                $oss->put(config('aliyun.oss.bucket'), $img->path, $content);
             }
             $img->save();
             ! $img->isDirty() && $img->touch();
@@ -73,7 +73,7 @@ class ImageController extends Controller
             Image::query()->whereIn('id', $ids)->delete();
             foreach($images as $image) {
                 if (! Image::query()->where('md5', $image->md5)->exists()) {
-                    $oss->delete('moodrain', $image->path);
+                    $oss->delete(config('aliyun.oss.bucket'), $image->path);
                 }
             }
             return rs();
